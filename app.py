@@ -1,6 +1,10 @@
+import os  # Import the os module
 import asyncio
 import websockets
 import random
+
+# Get the port value from the PORT environment variable or use a default (e.g., 10000)
+port = int(os.environ.get("PORT", 10000))
 
 async def server(websocket, path):
     try:
@@ -12,7 +16,8 @@ async def server(websocket, path):
     except websockets.exceptions.ConnectionClosedOK:
         print("WebSocket connection closed")
 
-start_server = websockets.serve(server, "0.0.0.0", 8080)  # Replace with your desired host and port
+# Use the port variable to specify the port
+start_server = websockets.serve(server, "0.0.0.0", port)
 
 async def main():
     await start_server
