@@ -1,33 +1,22 @@
-import eventlet
-import socketio
+import asyncio
+import websockets
+import random
 
-sio = socketio.Server()
-app = socketio.WSGIApp(sio, static_files={
-    '/': {'content_type': 'text/html', 'filename': 'index.html'}
-})
+async def server(websocket, path):
+    try:
+        while True:
+            message = await websocket.recv()
+            if message == "Capture":
+                response = random.randint(0, 1)
+                await websocket.send(str(response))
+    except websockets.exceptions.ConnectionClosedOK:
+        print("WebSocket connection closed")
 
+start_server = websockets.serve(server, "0.0.0.0", 8080)  # Replace with your desired host and port
 
-@sio.event
-def connect(sid, environ):
-    print('connect ', sid)
+async def main():
+    await start_server
+    await asyncio.Future()  # Keeps the server running
 
-
-@sio.on('message')
-def my_message(sid, data):
-    print('message ', data)
-    sio.emit('logs ', data)
-
-
-@sio.on('ping')
-def ping_event(sid, data):
-    print('message ', data)
-    sio.emit('capture', data)
-
-
-@sio.event
-def disconnect(sid):
-    print('disconnect ', sid)
-
-
-if __name__ == '__main__':
-    eventlet.wsgi.server(eventlet.listen(('', 5000)), app)
+if __name__ == "__main__":
+    asyncio.get_event_loop().run_until_complete(main())
